@@ -4,11 +4,13 @@ const API_BASE_URL = 'http://node3.dom4k.ru:9999/api';
 // Обработка авторизации
 document.addEventListener('DOMContentLoaded', function() {
     // Проверяем, есть ли уже токен
-    const token = localStorage.getItem('rucord_token');
-    if (token) {
-        // Если токен есть, перенаправляем в чат
-        window.location.href = '/';
-        return;
+    if (this.location.pathname === '/login') {
+        const token = localStorage.getItem('rucord_token');
+        if (token) {
+            // Если токен есть, перенаправляем в чат
+            window.location.href = '/';
+            return;
+        }
     }
 
     // Переключение между вкладками входа и регистрации
