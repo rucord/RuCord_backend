@@ -259,3 +259,16 @@ async function loadServers() {
         console.error('Ошибка загрузки серверов:', error);
     }
 }
+
+// Telegram Authentication
+function onTelegramAuth(user) {
+  fetch('/auth/telegram', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(user)
+  }).then(r => r.json())
+    .then(res => {
+      if (res.ok && res.redirect) window.location = res.redirect;
+      else console.error('Telegram auth failed', res);
+    });
+}

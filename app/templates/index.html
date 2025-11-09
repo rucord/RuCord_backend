@@ -31,6 +31,36 @@
                 <div class="gradient-orb"></div>
             </div>
         </main>
+
+        <div class="telegram-login">
+            <script async src="https://telegram.org/js/telegram-widget.js?15"
+                data-telegram-login="{{ TELEGRAM_BOT_USERNAME }}"
+                data-size="large"
+                data-userpic="true"
+                data-radius="10"
+                data-request-access="write"
+                data-lang="ru"
+                data-onauth="onTelegramAuth(user)">
+            </script>
+
+            <script>
+                function onTelegramAuth(user) {
+                    fetch('/auth/telegram', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(user)
+                    }).then(r => r.json())
+                        .then(res => {
+                            if (res.ok && res.redirect) {
+                                window.location = res.redirect;
+                            } else {
+                                alert('Telegram auth failed');
+                                console.error(res);
+                            }
+                        }).catch(e => { console.error(e); alert('Network error'); });
+                }
+            </script>
+        </div>
     </div>
 </body>
 </html>
