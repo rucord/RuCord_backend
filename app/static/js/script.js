@@ -141,17 +141,29 @@ function setupEventListeners() {
 
 // Загрузка серверов пользователя
 async function loadUserServers() {
-    try {
-        // В реальном приложении здесь будет API для получения серверов пользователя
-        // Пока используем заглушку
-        servers = [
-            { id: 1, name: 'Мой сервер', description: 'Мой первый сервер', is_public: true, is_owner: true },
-            { id: 2, name: 'Игровой чат', description: 'Для игровых сессий', is_public: true, is_owner: false }
-        ];
-        
+    const response = await fetch(`${API_BASE_URL}/user/servers`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            token: Auth.getToken()
+        })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        servers = result.servers;
         renderServers();
-    } catch (error) {
-        console.error('Ошибка загрузки серверов:', error);
+        
+        if (servers.length > 0) {
+            currentServer = servers[0];
+            document.getElementById('currentServerName').textContent = currentServer.name;
+            loadServerChannels(currentServer.id);
+        }
+    } else {
+        showNotification('Ошибка загрузки серверов', 'error');
     }
 }
 
@@ -189,7 +201,6 @@ async function createServer() {
             document.getElementById('createServerModal').style.display = 'none';
             form.reset();
             
-            // Обновляем список серверов
             await loadUserServers();
         } else {
             showNotification(result.message || 'Ошибка создания сервера', 'error');
