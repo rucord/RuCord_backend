@@ -1,5 +1,5 @@
 // Конфигурация API
-const API_BASE_URL = 'http://localhost:9999/api';
+const API_BASE_URL = 'http://node3.dom4k.ru:9999/api';
 
 // Обработка авторизации
 document.addEventListener('DOMContentLoaded', function() {
