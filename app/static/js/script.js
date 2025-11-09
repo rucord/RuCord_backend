@@ -141,7 +141,7 @@ function setupEventListeners() {
 
 // Загрузка серверов пользователя
 async function loadUserServers() {
-    const response = await fetch(`${API_BASE_URL}/servers/list`, {
+    const response = await fetch(`${API_BASE_URL}/server/list`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
