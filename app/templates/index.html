@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuCord - Общайтесь с друзьями</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- Модальные окна -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Вход в RuCord</h2>
+            <form id="loginForm">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Пароль" required>
+                <button type="submit">Войти</button>
+            </form>
+            <p>Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Регистрация в RuCord</h2>
+            <form id="registerForm">
+                <input type="text" placeholder="Имя пользователя" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Пароль" required>
+                <input type="password" placeholder="Подтвердите пароль" required>
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+            <p>Уже есть аккаунт? <a href="#" id="showLogin">Войти</a></p>
+        </div>
+    </div>
+
+    <!-- Главный интерфейс -->
+    <div class="app-container">
+        <!-- Боковая панель серверов -->
+        <div class="servers-sidebar">
+            <div class="server-list">
+                <div class="server-item active" data-server="home">
+                    <span>RC</span>
+                </div>
+                <div class="server-item" data-server="gaming">
+                    <span>🎮</span>
+                </div>
+                <div class="server-item" data-server="music">
+                    <span>🎵</span>
+                </div>
+                <div class="server-item" data-server="programming">
+                    <span>💻</span>
+                </div>
+                <div class="server-divider"></div>
+                <div class="server-item add-server">
+                    <span>+</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель каналов -->
+        <div class="channels-sidebar">
+            <div class="server-header">
+                <h3>RuCord</h3>
+            </div>
+            
+            <div class="channels-section">
+                <div class="section-header">
+                    <span>Текстовые каналы</span>
+                    <button class="add-channel">+</button>
+                </div>
+                <div class="channel-list">
+                    <div class="channel-item active"># общий</div>
+                    <div class="channel-item"># игры</div>
+                    <div class="channel-item"># музыка</div>
+                    <div class="channel-item"># программирование</div>
+                </div>
+            </div>
+
+            <div class="channels-section">
+                <div class="section-header">
+                    <span>Голосовые каналы</span>
+                    <button class="add-channel">+</button>
+                </div>
+                <div class="channel-list">
+                    <div class="channel-item voice">🔊 Общий чат</div>
+                    <div class="channel-item voice">🔊 Игровой</div>
+                </div>
+            </div>
+
+            <div class="user-panel">
+                <div class="user-info">
+                    <div class="avatar"></div>
+                    <div class="user-details">
+                        <span class="username">Пользователь</span>
+                        <span class="status">#0001</span>
+                    </div>
+                </div>
+                <div class="user-controls">
+                    <button class="control-btn">🎙️</button>
+                    <button class="control-btn">🎧</button>
+                    <button class="control-btn">⚙️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основная область чата -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="channel-info">
+                    <span class="hashtag">#</span>
+                    <h3>общий</h3>
+                </div>
+                <div class="chat-controls">
+                    <button class="header-btn">🔍</button>
+                    <button class="header-btn">📌</button>
+                    <button class="header-btn">👥</button>
+                    <input type="text" placeholder="Поиск" class="search-input">
+                </div>
+            </div>
+
+            <div class="messages-container">
+                <div class="message">
+                    <div class="avatar"></div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="username">Алексей</span>
+                            <span class="timestamp">Сегодня в 14:30</span>
+                        </div>
+                        <div class="message-text">Привет всем! Как дела?</div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="avatar"></div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="username">Мария</span>
+                            <span class="timestamp">Сегодня в 14:32</span>
+                        </div>
+                        <div class="message-text">Привет! Всё отлично, только что закончила новый проект ✨</div>
+                    </div>
+                </div>
+
+                <div class="message own-message">
+                    <div class="avatar"></div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="username">Вы</span>
+                            <span class="timestamp">Сегодня в 14:35</span>
+                        </div>
+                        <div class="message-text">Круто! А я как раз ищу людей для нового игрового проекта 🎮</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-input-container">
+                <div class="input-controls">
+                    <button class="input-btn">➕</button>
+                    <button class="input-btn">🎵</button>
+                    <button class="input-btn">😊</button>
+                </div>
+                <input type="text" placeholder="Написать сообщение в #общий" class="message-input">
+                <button class="send-btn">➤</button>
+            </div>
+        </div>
+
+        <!-- Панель участников -->
+        <div class="members-sidebar">
+            <div class="members-header">
+                <h4>УЧАСТНИКИ — 3</h4>
+            </div>
+            <div class="members-list">
+                <div class="member">
+                    <div class="avatar online"></div>
+                    <span class="member-name">Алексей</span>
+                </div>
+                <div class="member">
+                    <div class="avatar online"></div>
+                    <span class="member-name">Мария</span>
+                </div>
+                <div class="member">
+                    <div class="avatar idle"></div>
+                    <span class="member-name">Вы</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
