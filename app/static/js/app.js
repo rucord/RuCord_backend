@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('username', formData.username);
                     showMessage('Успешный вход! Перенаправление...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = '/dashboard';
                     }, 1000);
                 } else {
                     showMessage(data.message, 'error');
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('username', formData.username);
                     showMessage('Успешная регистрация! Перенаправление...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = '/dashboard';
                     }, 1000);
                 } else {
                     showMessage(data.message, 'error');
@@ -94,12 +94,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Дашборд
-    if (window.location.pathname.includes('dashboard.html')) {
+    if (window.location.pathname.includes('/dashboard')) {
         const token = localStorage.getItem('token');
         const username = localStorage.getItem('username');
         
         if (!token) {
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             return;
         }
         
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
             logoutBtn.addEventListener('click', () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('username');
-                window.location.href = 'index.html';
+                window.location.href = '/';
             });
         }
     }
