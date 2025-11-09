@@ -11,83 +11,82 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/';
             return;
         }
-    }
+        // Переключение между вкладками входа и регистрации
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+                
+                // Обновляем активные вкладки
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Показываем соответствующую форму
+                forms.forEach(form => {
+                    form.classList.remove('active');
+                    if (form.id === `${targetTab}Form`) {
+                        form.classList.add('active');
+                    }
+                });
 
-    // Переключение между вкладками входа и регистрации
-    const tabs = document.querySelectorAll('.auth-tab');
-    const forms = document.querySelectorAll('.auth-form');
-    
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const targetTab = this.dataset.tab;
-            
-            // Обновляем активные вкладки
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Показываем соответствующую форму
-            forms.forEach(form => {
-                form.classList.remove('active');
-                if (form.id === `${targetTab}Form`) {
-                    form.classList.add('active');
-                }
+                // Очищаем ошибки при переключении
+                clearErrors();
             });
-
-            // Очищаем ошибки при переключении
-            clearErrors();
         });
-    });
-    
-    // Обработка формы входа
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
         
-        const username = document.getElementById('loginUsername').value;
-        const password = document.getElementById('loginPassword').value;
+        // Обработка формы входа
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            await handleLogin(username, password);
+        });
         
-        await handleLogin(username, password);
-    });
-    
-    // Обработка формы регистрации
-    document.getElementById('registerForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('registerUsername').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-        
-        // Валидация пароля
-        if (password !== passwordConfirm) {
-            showFieldError('passwordError', 'Пароли не совпадают');
-            return;
+        // Обработка формы регистрации
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            // Валидация пароля
+            if (password !== passwordConfirm) {
+                showFieldError('passwordError', 'Пароли не совпадают');
+                return;
+            }
+
+            if (password.length < 4) {
+                showFieldError('passwordError', 'Пароль должен содержать минимум 4 символа');
+                return;
+            }
+
+            clearErrors();
+            await handleRegister(username, password, email);
+        });
+
+        // Автозаполнение тестовых данных
+        const demoLogin = document.querySelector('.auth-demo');
+        if (demoLogin) {
+            demoLogin.addEventListener('click', function() {
+                document.getElementById('loginUsername').value = 'dom4k';
+                document.getElementById('loginPassword').value = '1234';
+            });
         }
 
-        if (password.length < 4) {
-            showFieldError('passwordError', 'Пароль должен содержать минимум 4 символа');
-            return;
-        }
-
-        clearErrors();
-        await handleRegister(username, password, email);
-    });
-
-    // Автозаполнение тестовых данных
-    const demoLogin = document.querySelector('.auth-demo');
-    if (demoLogin) {
-        demoLogin.addEventListener('click', function() {
-            document.getElementById('loginUsername').value = 'dom4k';
-            document.getElementById('loginPassword').value = '1234';
+        // Очистка ошибок при вводе
+        const inputs = document.querySelectorAll('.neon-input');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                clearErrors();
+            });
         });
     }
-
-    // Очистка ошибок при вводе
-    const inputs = document.querySelectorAll('.neon-input');
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            clearErrors();
-        });
-    });
 });
 
 // Функция входа
