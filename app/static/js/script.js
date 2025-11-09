@@ -1,11 +1,12 @@
 // Конфигурация API
-const API_BASE_URL = 'http://node3.dom4k.ru:9999/api';
+const API_BASE_URL = 'http://localhost:9999/api';
 
 // Глобальные переменные
 let currentChannel = 'general';
+let currentServer = null;
 let messages = [];
+let servers = [];
 let users = [];
-let socket = null;
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
@@ -24,10 +25,10 @@ function initApp() {
         document.getElementById('currentUsername').textContent = username;
         document.querySelector('.user-welcome strong').textContent = username;
         
-        // Активируем функционал для авторизованных пользователей
-        document.getElementById('messageInput').disabled = false;
-        document.getElementById('messageInput').placeholder = 'Написать сообщение в #общий';
-        document.getElementById('sendMessageBtn').disabled = false;
+        // Загружаем серверы пользователя
+        loadUserServers();
+    } else {
+        showGuestMessage();
     }
 }
 
@@ -36,31 +37,68 @@ function checkAuthAndLoad() {
     if (Auth.checkAuth()) {
         loadChannelMessages(currentChannel);
         loadOnlineUsers();
-        initWebSocket();
     } else {
-        // Показываем сообщение для гостей
         showGuestMessage();
     }
 }
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Переключение серверов
-    const serverItems = document.querySelectorAll('.server-item:not(.add-server)');
-    serverItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (!Auth.checkAuth()) {
-                showNotification('Для переключения серверов необходимо войти в систему', 'warning');
-                return;
-            }
-            
-            serverItems.forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
-            const server = this.dataset.server;
-            loadServerData(server);
-        });
+    // Создание сервера
+    document.getElementById('createServerBtn').addEventListener('click', function() {
+        if (!Auth.checkAuth()) {
+            showNotification('Для создания сервера необходимо войти в систему', 'warning');
+            return;
+        }
+        document.getElementById('createServerModal').style.display = 'block';
     });
-    
+
+    // Присоединение к серверу
+    document.getElementById('joinServerBtn').addEventListener('click', function() {
+        if (!Auth.checkAuth()) {
+            showNotification('Для присоединения к серверу необходимо войти в систему', 'warning');
+            return;
+        }
+        document.getElementById('joinServerModal').style.display = 'block';
+    });
+
+    // Настройки сервера
+    document.getElementById('serverSettingsBtn').addEventListener('click', function() {
+        if (!currentServer) {
+            showNotification('Выберите сервер для настройки', 'warning');
+            return;
+        }
+        openServerSettings(currentServer);
+    });
+
+    // Выход
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        Auth.handleLogout();
+    });
+
+    // Форма создания сервера
+    document.getElementById('createServerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await createServer();
+    });
+
+    // Форма присоединения к серверу
+    document.getElementById('joinServerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await joinServer();
+    });
+
+    // Форма настроек сервера
+    document.getElementById('serverSettingsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await updateServer();
+    });
+
+    // Удаление сервера
+    document.getElementById('deleteServerBtn').addEventListener('click', async function() {
+        await deleteServer();
+    });
+
     // Переключение каналов
     const channelItems = document.querySelectorAll('.channel-item:not(.voice)');
     channelItems.forEach(item => {
@@ -78,18 +116,6 @@ function setupEventListeners() {
         });
     });
     
-    // Голосовые каналы
-    const voiceChannels = document.querySelectorAll('.channel-item.voice');
-    voiceChannels.forEach(channel => {
-        channel.addEventListener('click', function() {
-            if (!Auth.checkAuth()) {
-                showNotification('Для участия в голосовых каналах необходимо войти в систему', 'warning');
-                return;
-            }
-            document.getElementById('voiceCallModal').style.display = 'block';
-        });
-    });
-    
     // Отправка сообщения
     document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keypress', function(e) {
@@ -97,30 +123,391 @@ function setupEventListeners() {
             sendMessage();
         }
     });
-    
-    // Голосовой звонок
-    document.getElementById('voiceCallBtn').addEventListener('click', function() {
-        if (!Auth.checkAuth()) {
-            showNotification('Для звонков необходимо войти в систему', 'warning');
-            return;
+
+    // Закрытие модальных окон
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
         }
-        document.getElementById('voiceCallModal').style.display = 'block';
-    });
-    
-    document.getElementById('endCallBtn').addEventListener('click', function() {
-        document.getElementById('voiceCallModal').style.display = 'none';
-        showNotification('Звонок завершен');
+        
+        if (e.target.classList.contains('close')) {
+            e.target.closest('.modal').style.display = 'none';
+        }
     });
 
-    // Кнопка выхода
-    const logoutBtn = document.querySelector('.control-btn[href="/login"]');
-    if (logoutBtn && Auth.checkAuth()) {
-        logoutBtn.textContent = '🚪';
-        logoutBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            Auth.handleLogout();
-        });
+    // Переключение видимости участников
+    document.getElementById('membersToggleBtn').addEventListener('click', function() {
+        const membersPanel = document.getElementById('membersPanel');
+        membersPanel.classList.toggle('visible');
+    });
+}
+
+// Загрузка серверов пользователя
+async function loadUserServers() {
+    try {
+        // В реальном приложении здесь будет API для получения серверов пользователя
+        // Пока используем заглушку
+        servers = [
+            { id: 1, name: 'Мой сервер', description: 'Мой первый сервер', is_public: true, is_owner: true },
+            { id: 2, name: 'Игровой чат', description: 'Для игровых сессий', is_public: true, is_owner: false }
+        ];
+        
+        renderServers();
+    } catch (error) {
+        console.error('Ошибка загрузки серверов:', error);
     }
+}
+
+// Создание сервера
+async function createServer() {
+    const form = document.getElementById('createServerForm');
+    const submitBtn = form.querySelector('button');
+    const originalText = submitBtn.textContent;
+
+    try {
+        submitBtn.textContent = 'Создание...';
+        submitBtn.disabled = true;
+
+        const name = document.getElementById('serverName').value;
+        const description = document.getElementById('serverDescription').value;
+        const is_public = document.getElementById('serverIsPublic').checked;
+
+        const response = await fetch(`${API_BASE_URL}/server/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: Auth.getToken(),
+                name,
+                description,
+                is_public
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Сервер успешно создан!', 'success');
+            document.getElementById('createServerModal').style.display = 'none';
+            form.reset();
+            
+            // Обновляем список серверов
+            await loadUserServers();
+        } else {
+            showNotification(result.message || 'Ошибка создания сервера', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка создания сервера:', error);
+        showNotification('Ошибка подключения к серверу', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Присоединение к серверу
+async function joinServer() {
+    const form = document.getElementById('joinServerForm');
+    const submitBtn = form.querySelector('button');
+    const originalText = submitBtn.textContent;
+
+    try {
+        submitBtn.textContent = 'Присоединение...';
+        submitBtn.disabled = true;
+
+        const server_id = parseInt(document.getElementById('joinServerId').value);
+
+        const response = await fetch(`${API_BASE_URL}/server/join`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: Auth.getToken(),
+                server_id
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Успешно присоединились к серверу!', 'success');
+            document.getElementById('joinServerModal').style.display = 'none';
+            form.reset();
+            
+            // Обновляем список серверов
+            await loadUserServers();
+        } else {
+            showNotification(result.message || 'Ошибка присоединения к серверу', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка присоединения к серверу:', error);
+        showNotification('Ошибка подключения к серверу', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Выход из сервера
+async function leaveServer(serverId) {
+    if (!confirm('Вы уверены, что хотите покинуть сервер?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/server/leave`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: Auth.getToken(),
+                server_id: serverId
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Вы покинули сервер', 'success');
+            await loadUserServers();
+        } else {
+            showNotification(result.message || 'Ошибка выхода из сервера', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка выхода из сервера:', error);
+        showNotification('Ошибка подключения к серверу', 'error');
+    }
+}
+
+// Обновление сервера
+async function updateServer() {
+    const form = document.getElementById('serverSettingsForm');
+    const submitBtn = form.querySelector('button');
+    const originalText = submitBtn.textContent;
+
+    try {
+        submitBtn.textContent = 'Сохранение...';
+        submitBtn.disabled = true;
+
+        const server_id = parseInt(document.getElementById('editServerId').value);
+        const name = document.getElementById('editServerName').value;
+        const description = document.getElementById('editServerDescription').value;
+        const is_public = document.getElementById('editServerIsPublic').checked;
+
+        const response = await fetch(`${API_BASE_URL}/server/edit`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: Auth.getToken(),
+                server_id,
+                name,
+                description,
+                is_public
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Настройки сервера обновлены!', 'success');
+            document.getElementById('serverSettingsModal').style.display = 'none';
+            
+            // Обновляем список серверов
+            await loadUserServers();
+        } else {
+            showNotification(result.message || 'Ошибка обновления сервера', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка обновления сервера:', error);
+        showNotification('Ошибка подключения к серверу', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Удаление сервера
+async function deleteServer() {
+    const server_id = parseInt(document.getElementById('editServerId').value);
+    
+    if (!confirm('Вы уверены, что хотите удалить сервер? Это действие нельзя отменить.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/server/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: Auth.getToken(),
+                server_id
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Сервер успешно удален!', 'success');
+            document.getElementById('serverSettingsModal').style.display = 'none';
+            
+            // Обновляем список серверов
+            await loadUserServers();
+        } else {
+            showNotification(result.message || 'Ошибка удаления сервера', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка удаления сервера:', error);
+        showNotification('Ошибка подключения к серверу', 'error');
+    }
+}
+
+// Открытие настроек сервера
+function openServerSettings(server) {
+    document.getElementById('editServerId').value = server.id;
+    document.getElementById('editServerName').value = server.name;
+    document.getElementById('editServerDescription').value = server.description || '';
+    document.getElementById('editServerIsPublic').checked = server.is_public;
+    
+    // Показываем/скрываем кнопку удаления в зависимости от прав
+    const deleteBtn = document.getElementById('deleteServerBtn');
+    deleteBtn.style.display = server.is_owner ? 'block' : 'none';
+    
+    document.getElementById('serverSettingsModal').style.display = 'block';
+}
+
+// Рендер серверов
+function renderServers() {
+    const serverList = document.getElementById('serverList');
+    
+    // Очищаем список, кроме домашнего сервера
+    const homeServer = serverList.querySelector('[data-server="home"]').parentNode;
+    serverList.innerHTML = '';
+    serverList.appendChild(homeServer);
+
+    servers.forEach(server => {
+        const serverElement = document.createElement('div');
+        serverElement.className = 'server-item';
+        serverElement.innerHTML = `
+            <span>${server.name.charAt(0).toUpperCase()}</span>
+            <div class="server-tooltip">${server.name}${server.is_owner ? ' 👑' : ''}</div>
+        `;
+        
+        serverElement.addEventListener('click', function() {
+            document.querySelectorAll('.server-item').forEach(item => item.classList.remove('active'));
+            this.classList.add('active');
+            currentServer = server;
+            document.getElementById('currentServerName').textContent = server.name;
+            loadServerChannels(server.id);
+        });
+
+        // Контекстное меню для сервера
+        serverElement.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            showServerContextMenu(e, server);
+        });
+
+        serverList.appendChild(serverElement);
+    });
+}
+
+// Контекстное меню сервера
+function showServerContextMenu(e, server) {
+    // Удаляем существующее контекстное меню
+    const existingMenu = document.querySelector('.context-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+    }
+
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'context-menu neon-border';
+    contextMenu.style.position = 'fixed';
+    contextMenu.style.left = e.pageX + 'px';
+    contextMenu.style.top = e.pageY + 'px';
+
+    let menuItems = '';
+
+    if (server.is_owner) {
+        menuItems += `<div class="context-item" data-action="settings">⚙️ Настройки</div>`;
+        menuItems += `<div class="context-item" data-action="delete">🗑️ Удалить</div>`;
+    } else {
+        menuItems += `<div class="context-item" data-action="leave">🚪 Покинуть</div>`;
+    }
+
+    contextMenu.innerHTML = menuItems;
+    document.body.appendChild(contextMenu);
+
+    // Обработка выбора пунктов меню
+    contextMenu.querySelectorAll('.context-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const action = this.dataset.action;
+            switch (action) {
+                case 'settings':
+                    openServerSettings(server);
+                    break;
+                case 'delete':
+                    deleteServer(server.id);
+                    break;
+                case 'leave':
+                    leaveServer(server.id);
+                    break;
+            }
+            contextMenu.remove();
+        });
+    });
+
+    // Закрытие меню при клике вне его
+    document.addEventListener('click', function closeMenu() {
+        contextMenu.remove();
+        document.removeEventListener('click', closeMenu);
+    });
+}
+
+// Загрузка каналов сервера
+async function loadServerChannels(serverId) {
+    try {
+        // В реальном приложении здесь будет API для получения каналов сервера
+        const channels = [
+            { id: 1, name: 'общий', type: 'text' },
+            { id: 2, name: 'игры', type: 'text' },
+            { id: 3, name: 'музыка', type: 'text' }
+        ];
+        
+        renderChannels(channels);
+    } catch (error) {
+        console.error('Ошибка загрузки каналов:', error);
+    }
+}
+
+// Рендер каналов
+function renderChannels(channels) {
+    const channelList = document.getElementById('channelList');
+    channelList.innerHTML = '';
+
+    channels.forEach(channel => {
+        const channelElement = document.createElement('div');
+        channelElement.className = `channel-item ${channel.type === 'voice' ? 'voice' : ''}`;
+        channelElement.innerHTML = channel.type === 'voice' ? `🔊 ${channel.name}` : `# ${channel.name}`;
+        
+        if (channel.type === 'text') {
+            channelElement.addEventListener('click', function() {
+                document.querySelectorAll('.channel-item').forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+                currentChannel = channel.name;
+                document.getElementById('currentChannel').textContent = channel.name;
+                document.getElementById('messageInput').placeholder = `Написать сообщение в #${channel.name}`;
+                loadChannelMessages(channel.name);
+            });
+        }
+
+        channelList.appendChild(channelElement);
+    });
 }
 
 // Загрузка сообщений канала
@@ -131,36 +518,27 @@ async function loadChannelMessages(channel) {
             return;
         }
 
-        const token = Auth.getToken();
-        const response = await fetch(`${API_BASE_URL}/messages/${channel}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        // В реальном приложении здесь будет API для получения сообщений
+        messages = [
+            {
+                id: 1,
+                username: Auth.getUsername(),
+                content: 'Добро пожаловать в RuCord! Это ваш первый вход.',
+                timestamp: new Date().toISOString(),
+                userId: 'current'
+            },
+            {
+                id: 2,
+                username: 'dom4k',
+                content: 'Привет! Как дела?',
+                timestamp: new Date(Date.now() - 300000).toISOString(),
+                userId: 'user2'
             }
-        });
+        ];
         
-        if (response.ok) {
-            messages = await response.json();
-            renderMessages();
-        } else if (response.status === 401) {
-            // Токен невалидный, разлогиниваем
-            Auth.handleLogout();
-        }
+        renderMessages();
     } catch (error) {
         console.error('Ошибка загрузки сообщений:', error);
-        // Заглушка с демо-сообщениями
-        if (Auth.checkAuth()) {
-            messages = [
-                {
-                    id: 1,
-                    username: Auth.getUsername(),
-                    content: 'Добро пожаловать в RuCord! Это ваш первый вход.',
-                    timestamp: new Date().toISOString(),
-                    userId: 'current'
-                }
-            ];
-            renderMessages();
-        }
     }
 }
 
@@ -176,31 +554,24 @@ async function sendMessage() {
     
     if (!content) return;
     
-    const message = {
-        content: content,
-        channel: currentChannel
-    };
-    
     try {
-        const token = Auth.getToken();
-        const response = await fetch(`${API_BASE_URL}/messages`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(message)
-        });
+        // В реальном приложении здесь будет API для отправки сообщений
+        const message = {
+            id: Date.now(),
+            username: Auth.getUsername(),
+            content: content,
+            timestamp: new Date().toISOString(),
+            userId: 'current'
+        };
         
-        if (response.ok) {
-            input.value = '';
-            // Сообщение будет добавлено через WebSocket или обновление списка
-            loadChannelMessages(currentChannel);
-        } else if (response.status === 401) {
-            Auth.handleLogout();
-        } else {
-            throw new Error('Ошибка отправки сообщения');
-        }
+        messages.push(message);
+        renderMessages();
+        input.value = '';
+        
+        // Прокрутка к последнему сообщению
+        const container = document.getElementById('messagesContainer');
+        container.scrollTop = container.scrollHeight;
+        
     } catch (error) {
         showNotification('Ошибка отправки: ' + error.message, 'error');
     }
@@ -211,17 +582,14 @@ async function loadOnlineUsers() {
     try {
         if (!Auth.checkAuth()) return;
 
-        const token = Auth.getToken();
-        const response = await fetch(`${API_BASE_URL}/users/online`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        // В реальном приложении здесь будет API для получения онлайн пользователей
+        users = [
+            { id: 'current', username: Auth.getUsername(), status: 'online' },
+            { id: 'user2', username: 'dom4k', status: 'online' },
+            { id: 'user3', username: 'test_user', status: 'idle' }
+        ];
         
-        if (response.ok) {
-            users = await response.json();
-            renderOnlineUsers();
-        }
+        renderOnlineUsers();
     } catch (error) {
         console.error('Ошибка загрузки пользователей:', error);
     }
@@ -261,6 +629,26 @@ function renderMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
+// Рендер онлайн пользователей
+function renderOnlineUsers() {
+    const container = document.getElementById('membersList');
+    const onlineCount = users.filter(user => user.status === 'online').length;
+    
+    document.getElementById('onlineCount').textContent = users.length;
+    container.innerHTML = '';
+    
+    users.forEach(user => {
+        const isOwn = user.username === Auth.getUsername();
+        const memberElement = document.createElement('div');
+        memberElement.className = 'member';
+        memberElement.innerHTML = `
+            <div class="avatar ${user.status}"></div>
+            <span class="member-name">${user.username}${isOwn ? ' (Вы)' : ''}</span>
+        `;
+        container.appendChild(memberElement);
+    });
+}
+
 // Показать сообщение для гостей
 function showGuestMessage() {
     const container = document.getElementById('messagesContainer');
@@ -281,38 +669,6 @@ function showGuestMessage() {
             </div>
         </div>
     `;
-}
-
-// Рендер онлайн пользователей
-function renderOnlineUsers() {
-    const container = document.getElementById('membersList');
-    const onlineCount = users.filter(user => user.status === 'online').length;
-    
-    document.getElementById('onlineCount').textContent = onlineCount + 1; // +1 текущий пользователь
-    
-    container.innerHTML = '';
-    
-    // Добавляем текущего пользователя
-    const currentUserElement = document.createElement('div');
-    currentUserElement.className = 'member';
-    currentUserElement.innerHTML = `
-        <div class="avatar idle"></div>
-        <span class="member-name">${Auth.getUsername()} (Вы)</span>
-    `;
-    container.appendChild(currentUserElement);
-    
-    // Добавляем остальных пользователей
-    users.forEach(user => {
-        if (user.username !== Auth.getUsername()) {
-            const memberElement = document.createElement('div');
-            memberElement.className = 'member';
-            memberElement.innerHTML = `
-                <div class="avatar ${user.status}"></div>
-                <span class="member-name">${user.username}</span>
-            `;
-            container.appendChild(memberElement);
-        }
-    });
 }
 
 // Форматирование времени
@@ -339,35 +695,6 @@ function showNotification(message, type = 'info') {
     notification.classList.remove('hidden');
     
     setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.classList.add('hidden');
-        }, 300);
+        notification.classList.add('hidden');
     }, 4000);
 }
-
-// Инициализация WebSocket
-function initWebSocket() {
-    if (!Auth.checkAuth()) return;
-
-    const token = Auth.getToken();
-    // WebSocket подключение будет здесь
-    console.log('WebSocket connection initialized with token:', token);
-}
-
-// Загрузка данных сервера
-async function loadServerData(server) {
-    showNotification(`Загрузка сервера: ${server}`);
-    // Здесь будет загрузка данных конкретного сервера
-}
-
-// Закрытие модальных окон
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal')) {
-        e.target.style.display = 'none';
-    }
-    
-    if (e.target.classList.contains('close')) {
-        e.target.closest('.modal').style.display = 'none';
-    }
-});

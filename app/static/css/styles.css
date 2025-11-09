@@ -984,3 +984,189 @@ body::before {
     border-radius: 8px;
     font-size: 0.9em;
 }
+/* Стили для серверов */
+.server-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.server-action-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 18px;
+}
+
+.server-action-btn:hover {
+    background: var(--neon-purple);
+    transform: scale(1.1);
+}
+
+.server-tooltip {
+    position: absolute;
+    left: 70px;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 8px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+    border: 1px solid var(--neon-purple);
+}
+
+.server-item:hover .server-tooltip {
+    opacity: 1;
+}
+
+/* Контекстное меню */
+.context-menu {
+    background: rgba(34, 34, 34, 0.95);
+    border-radius: 8px;
+    padding: 8px 0;
+    min-width: 150px;
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+}
+
+.context-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.context-item:hover {
+    background: rgba(188, 19, 254, 0.2);
+}
+
+/* Заголовок с действиями */
+.header-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.header-action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.header-action-btn:hover {
+    background: var(--neon-purple);
+    color: white;
+}
+
+/* Панель участников */
+.members-panel {
+    margin-top: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.members-panel.visible {
+    display: block;
+}
+
+.members-header {
+    margin-bottom: 15px;
+}
+
+.members-header h4 {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Формы в модальных окнах */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.form-actions .neon-button {
+    flex: 1;
+}
+
+.form-actions .neon-button.danger {
+    background: linear-gradient(45deg, var(--danger), #ff0066);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    gap: 10px;
+}
+
+.checkbox-label input {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--neon-purple);
+    border-radius: 4px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label input:checked + .checkmark {
+    background: var(--neon-purple);
+}
+
+.checkbox-label input:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .servers-sidebar {
+        width: 60px;
+    }
+    
+    .channels-sidebar {
+        width: 200px;
+    }
+    
+    .server-tooltip {
+        display: none;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}

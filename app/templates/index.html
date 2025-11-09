@@ -7,37 +7,101 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    <!-- Модальные окна -->
+    <div id="createServerModal" class="modal">
+        <div class="modal-content neon-border">
+            <span class="close">&times;</span>
+            <h2 class="neon-text">Создать сервер</h2>
+            <form id="createServerForm">
+                <div class="form-group">
+                    <input type="text" placeholder="Название сервера" required class="neon-input" id="serverName">
+                </div>
+                <div class="form-group">
+                    <textarea placeholder="Описание сервера (опционально)" class="neon-input" id="serverDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="serverIsPublic" checked>
+                        <span class="checkmark"></span>
+                        Публичный сервер
+                    </label>
+                </div>
+                <button type="submit" class="neon-button full-width">Создать сервер</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="joinServerModal" class="modal">
+        <div class="modal-content neon-border">
+            <span class="close">&times;</span>
+            <h2 class="neon-text">Присоединиться к серверу</h2>
+            <form id="joinServerForm">
+                <div class="form-group">
+                    <input type="number" placeholder="ID сервера" required class="neon-input" id="joinServerId">
+                </div>
+                <button type="submit" class="neon-button full-width">Присоединиться</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="serverSettingsModal" class="modal">
+        <div class="modal-content neon-border">
+            <span class="close">&times;</span>
+            <h2 class="neon-text">Настройки сервера</h2>
+            <form id="serverSettingsForm">
+                <input type="hidden" id="editServerId">
+                <div class="form-group">
+                    <input type="text" placeholder="Название сервера" required class="neon-input" id="editServerName">
+                </div>
+                <div class="form-group">
+                    <textarea placeholder="Описание сервера" class="neon-input" id="editServerDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="editServerIsPublic">
+                        <span class="checkmark"></span>
+                        Публичный сервер
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="neon-button">Сохранить</button>
+                    <button type="button" class="neon-button danger" id="deleteServerBtn">Удалить сервер</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Главный интерфейс -->
     <div class="app-container">
         <!-- Боковая панель серверов -->
         <div class="servers-sidebar">
-            <div class="server-list">
+            <div class="server-list" id="serverList">
                 <div class="server-item active neon-glow" data-server="home">
                     <span class="neon-text">RC</span>
                 </div>
-                <div class="server-item" data-server="gaming">
-                    <span>🎮</span>
-                </div>
-                <div class="server-item" data-server="music">
-                    <span>🎵</span>
-                </div>
-                <div class="server-item" data-server="programming">
-                    <span>💻</span>
-                </div>
-                <div class="server-divider"></div>
-                <div class="server-item add-server neon-glow">
+                <!-- Серверы будут добавляться здесь -->
+            </div>
+            <div class="server-actions">
+                <button class="server-action-btn neon-glow" id="createServerBtn" title="Создать сервер">
                     <span>+</span>
-                </div>
+                </button>
+                <button class="server-action-btn neon-glow" id="joinServerBtn" title="Присоединиться к серверу">
+                    <span>🔍</span>
+                </button>
             </div>
         </div>
 
         <!-- Панель каналов -->
         <div class="channels-sidebar">
             <div class="server-header">
-                <h3 class="neon-text">RuCord</h3>
+                <h3 class="neon-text" id="currentServerName">RuCord</h3>
                 <div class="user-welcome">
                     <span>Добро пожаловать, <strong id="currentUsername">Гость</strong>!</span>
-                    <a href="/login" class="neon-link">Войти</a>
+                    <div class="header-actions">
+                        <button class="header-action-btn" id="serverMembersBtn" title="Участники">👥</button>
+                        <button class="header-action-btn" id="serverSettingsBtn" title="Настройки">⚙️</button>
+                        <button class="header-action-btn" id="logoutBtn" title="Выйти">🚪</button>
+                    </div>
                 </div>
             </div>
             
@@ -46,11 +110,9 @@
                     <span>Текстовые каналы</span>
                     <button class="add-channel neon-button-small">+</button>
                 </div>
-                <div class="channel-list">
+                <div class="channel-list" id="channelList">
                     <div class="channel-item active neon-glow"># общий</div>
-                    <div class="channel-item"># игры</div>
-                    <div class="channel-item"># музыка</div>
-                    <div class="channel-item"># программирование</div>
+                    <!-- Каналы будут добавляться здесь -->
                 </div>
             </div>
 
@@ -65,18 +127,12 @@
                 </div>
             </div>
 
-            <div class="user-panel neon-border-top">
-                <div class="user-info">
-                    <div class="avatar neon-glow"></div>
-                    <div class="user-details">
-                        <span class="username" id="currentUsername">Гость</span>
-                        <span class="status">#0000</span>
-                    </div>
+            <div class="members-panel" id="membersPanel">
+                <div class="members-header">
+                    <h4>УЧАСТНИКИ — <span id="onlineCount">0</span></h4>
                 </div>
-                <div class="user-controls">
-                    <button class="control-btn" id="voiceCallBtn">🎙️</button>
-                    <button class="control-btn">🎧</button>
-                    <a href="/login" class="control-btn">🔑</a>
+                <div class="members-list" id="membersList">
+                    <!-- Участники будут добавляться здесь -->
                 </div>
             </div>
         </div>
@@ -89,25 +145,15 @@
                     <h3 id="currentChannel">общий</h3>
                 </div>
                 <div class="chat-controls">
-                    <button class="header-btn">🔍</button>
-                    <button class="header-btn">📌</button>
-                    <button class="header-btn">👥</button>
-                    <input type="text" placeholder="Поиск" class="search-input neon-input">
+                    <button class="header-btn" id="searchBtn">🔍</button>
+                    <button class="header-btn" id="pinBtn">📌</button>
+                    <button class="header-btn" id="membersToggleBtn">👥</button>
+                    <input type="text" placeholder="Поиск" class="search-input neon-input" id="searchInput">
                 </div>
             </div>
 
             <div class="messages-container" id="messagesContainer">
-                <!-- Сообщения будут загружаться через API -->
-                <div class="message">
-                    <div class="avatar online"></div>
-                    <div class="message-content">
-                        <div class="message-header">
-                            <span class="username">Система</span>
-                            <span class="timestamp">Только что</span>
-                        </div>
-                        <div class="message-text">Добро пожаловать в RuCord! Для полного доступа <a href="/login" class="neon-link">войдите в систему</a>.</div>
-                    </div>
-                </div>
+                <!-- Сообщения будут загружаться здесь -->
             </div>
 
             <div class="message-input-container neon-border">
@@ -116,21 +162,8 @@
                     <button class="input-btn">🎵</button>
                     <button class="input-btn">😊</button>
                 </div>
-                <input type="text" placeholder="Войдите для отправки сообщений" class="message-input neon-input" id="messageInput" disabled>
-                <button class="send-btn neon-button" id="sendMessageBtn" disabled>➤</button>
-            </div>
-        </div>
-
-        <!-- Панель участников -->
-        <div class="members-sidebar">
-            <div class="members-header">
-                <h4>УЧАСТНИКИ — <span id="onlineCount">1</span></h4>
-            </div>
-            <div class="members-list" id="membersList">
-                <div class="member">
-                    <div class="avatar online"></div>
-                    <span class="member-name">Вы (Гость)</span>
-                </div>
+                <input type="text" placeholder="Написать сообщение в #общий" class="message-input neon-input" id="messageInput">
+                <button class="send-btn neon-button" id="sendMessageBtn">➤</button>
             </div>
         </div>
     </div>
@@ -140,28 +173,7 @@
         <span id="notificationText"></span>
     </div>
 
-    <!-- Голосовой звонок -->
-    <div id="voiceCallModal" class="modal">
-        <div class="modal-content neon-border call-modal">
-            <span class="close">&times;</span>
-            <h2 class="neon-text">Голосовой звонок</h2>
-            <div class="call-participants">
-                <div class="participant">
-                    <div class="avatar large neon-glow"></div>
-                    <span class="participant-name">Вы</span>
-                </div>
-            </div>
-            <div class="call-info">
-                <p>Для участия в звонках необходимо войти в систему</p>
-            </div>
-            <div class="call-controls">
-                <button class="call-btn neon-button" id="muteBtn" disabled>🎤</button>
-                <button class="call-btn neon-button danger" id="endCallBtn">📞</button>
-                <button class="call-btn neon-button" id="deafenBtn" disabled>🎧</button>
-            </div>
-        </div>
-    </div>
-
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

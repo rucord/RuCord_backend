@@ -1,5 +1,5 @@
 // Конфигурация API
-const API_BASE_URL = 'http://node3.dom4k.ru:9999/api';
+const API_BASE_URL = 'http://localhost:9999/api';
 
 // Обработка авторизации
 document.addEventListener('DOMContentLoaded', function() {
@@ -119,7 +119,7 @@ async function handleLogin(username, password) {
                 window.location.href = '/';
             }, 1000);
         } else {
-            showNotification('Неверное имя пользователя или пароль', 'error');
+            showNotification(result.message || 'Неверное имя пользователя или пароль', 'error');
         }
     } catch (error) {
         console.error('Ошибка входа:', error);
