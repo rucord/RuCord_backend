@@ -25,7 +25,7 @@ def verify_telegram_auth(data: dict) -> bool:
         data_check_arr.append(f"{key}={data[key]}")
     data_check_string = "\n".join(data_check_arr)
 
-    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    bot_token = current_app.config.get("TELEGRAM_BOT_TOKEN", "")
     if not bot_token:
         current_app.logger.error("TELEGRAM_BOT_TOKEN not set")
         return False
