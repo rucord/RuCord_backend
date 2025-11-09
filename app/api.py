@@ -195,82 +195,82 @@ def api_server_edit():
 
 """
 # Register
-curl -X POST http://localhost:9999/api/auth/register -H "Content-Type: application/json" -d '{"username":"dom4k","email":"me@dom4k.pro","password":"1234"}'
+curl -X POST http://node3.dom4k.ru:9999/api/auth/register -H "Content-Type: application/json" -d '{"username":"dom4k","email":"me@dom4k.pro","password":"1234"}'
 -> {"success":true,"token":"<token_value>"}
 
-curl -X POST http://localhost:9999/api/auth/register -H "Content-Type: application/json" -d '{"username":"dom4k","email":"me@15999.ru","password":"4321"}'
+curl -X POST http://node3.dom4k.ru:9999/api/auth/register -H "Content-Type: application/json" -d '{"username":"dom4k","email":"me@15999.ru","password":"4321"}'
 -> {"success":false,"value":"username","message":"Username already taken"}
 
-curl -X POST http://localhost:9999/api/auth/register -H "Content-Type: application/json" -d '{"username":"15999","email":"me@dom4k.pro","password":"4321"}'
+curl -X POST http://node3.dom4k.ru:9999/api/auth/register -H "Content-Type: application/json" -d '{"username":"15999","email":"me@dom4k.pro","password":"4321"}'
 -> {"success":false,"value":"email","message":"Email already in use"}
 
 # Login
-curl -X POST http://localhost:9999/api/auth/login -H "Content-Type: application/json" -d '{"username":"dom4k","password":"1234"}'
+curl -X POST http://node3.dom4k.ru:9999/api/auth/login -H "Content-Type: application/json" -d '{"username":"dom4k","password":"1234"}'
 -> {"success":true,"token":"<token_value>"}
 
-curl -X POST http://localhost:9999/api/auth/login -H "Content-Type: application/json" -d '{"username":"dom4k","password":"wrongpassword"}'
+curl -X POST http://node3.dom4k.ru:9999/api/auth/login -H "Content-Type: application/json" -d '{"username":"dom4k","password":"wrongpassword"}'
 -> {"success":false,"message":"Invalid credentials"}
 
 # Create Server
-curl -X POST http://localhost:9999/api/server/create -H "Content-Type: application/json" -d '{"token":"<token_value>","name":"My Server","description":"This is my server","is_public":true}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/create -H "Content-Type: application/json" -d '{"token":"<token_value>","name":"My Server","description":"This is my server","is_public":true}'
 -> {"success":true,"server_id":1}
 
-curl -X POST http://localhost:9999/api/server/create -H "Content-Type: application/json" -d '{"token":"<token_value>","name":"My Server","description":"Another server"}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/create -H "Content-Type: application/json" -d '{"token":"<token_value>","name":"My Server","description":"Another server"}'
 -> {"success":false,"message":"Server name already exists"}
 
 # Join Server
-curl -X POST http://localhost:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
 -> {"success":true,"message":"Joined server successfully"}
 
-curl -X POST http://localhost:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":999}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":999}'
 -> {"success":false,"message":"Server not found"}
 
-curl -X POST http://localhost:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":2}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":2}'
 -> {"success":false,"message":"Cannot join private server"}
 
-curl -X POST http://localhost:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/join -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
 -> {"success":false,"message":"User already in server"}
 
 # Leave Server
-curl -X POST http://localhost:9999/api/server/leave -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/leave -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
 -> {"success":true,"message":"Left server successfully"}
 
-curl -X POST http://localhost:9999/api/server/leave -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":999}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/leave -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":999}'
 -> {"success":false,"message":"Server not found"}
 
-curl -X POST http://localhost:9999/api/server/leave -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/leave -H "Content-Type: application/json" -d '{"token":"<token_value>","server_id":1}'
 -> {"success":false,"message":"User not in server"}
 
 # Kick User
-curl -X POST http://localhost:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1,"user_id":2}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1,"user_id":2}'
 -> {"success":true,"message":"User kicked successfully"}
 
-curl -X POST http://localhost:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<non_owner_token>","server_id":1,"user_id":2}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<non_owner_token>","server_id":1,"user_id":2}'
 -> {"success":false,"message":"Only the server owner can kick users"}
 
-curl -X POST http://localhost:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1,"user_id":999}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1,"user_id":999}'
 -> {"success":false,"message":"User not in server"}
 
-curl -X POST http://localhost:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":999,"user_id":2}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/kick -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":999,"user_id":2}'
 -> {"success":false,"message":"Server not found"}
 
 # Delete Server
-curl -X POST http://localhost:9999/api/server/delete -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/delete -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1}'
 -> {"success":true,"message":"Server deleted successfully"}
 
-curl -X POST http://localhost:9999/api/server/delete -H "Content-Type: application/json" -d '{"token":"<non_owner_token>","server_id":1}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/delete -H "Content-Type: application/json" -d '{"token":"<non_owner_token>","server_id":1}'
 -> {"success":false,"message":"Only the server owner can delete the server"}
 
-curl -X POST http://localhost:9999/api/server/delete -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":999}'
+curl -X POST http://node3.dom4k.ru:9999/api/server/delete -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":999}'
 -> {"success":false,"message":"Server not found"}
 
 # Edit Server
-curl -X UPDATE http://localhost:9999/api/server/edit -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1,"name":"New Server Name","description":"Updated description","is_public":false}'
+curl -X UPDATE http://node3.dom4k.ru:9999/api/server/edit -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":1,"name":"New Server Name","description":"Updated description","is_public":false}'
 -> {"success":true,"message":"Server updated successfully"}
 
-curl -X UPDATE http://localhost:9999/api/server/edit -H "Content-Type: application/json" -d '{"token":"<non_owner_token>","server_id":1,"name":"New Server Name"}'
+curl -X UPDATE http://node3.dom4k.ru:9999/api/server/edit -H "Content-Type: application/json" -d '{"token":"<non_owner_token>","server_id":1,"name":"New Server Name"}'
 -> {"success":false,"message":"Only the server owner can edit the server"}
 
-curl -X UPDATE http://localhost:9999/api/server/edit -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":999,"name":"New Server Name"}'
+curl -X UPDATE http://node3.dom4k.ru:9999/api/server/edit -H "Content-Type: application/json" -d '{"token":"<owner_token>","server_id":999,"name":"New Server Name"}'
 -> {"success":false,"message":"Server not found"}
 """
