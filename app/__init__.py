@@ -9,6 +9,12 @@ app.config['TELEGRAM_BOT_USERNAME'] = 'rucord_bot'
 
 db = SQLAlchemy(app)
 
+# inject bot username into all templates
+@app.context_processor
+def inject_telegram_bot():
+    return {"TELEGRAM_BOT_USERNAME": app.config.get("TELEGRAM_BOT_USERNAME", "")}
+
+# импортируем blueprint после создания db, чтобы избежать circular import
 from app.telegram_auth import telegram_bp
 app.register_blueprint(telegram_bp)
 
