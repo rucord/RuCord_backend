@@ -22,7 +22,7 @@
             <!-- Форма входа -->
             <form id="loginForm" class="auth-form active">
                 <div class="form-group">
-                    <input type="email" placeholder="Email" required class="neon-input" id="loginEmail">
+                    <input type="text" placeholder="Имя пользователя" required class="neon-input" id="loginUsername">
                 </div>
                 <div class="form-group">
                     <input type="password" placeholder="Пароль" required class="neon-input" id="loginPassword">
@@ -37,15 +37,18 @@
             <form id="registerForm" class="auth-form">
                 <div class="form-group">
                     <input type="text" placeholder="Имя пользователя" required class="neon-input" id="registerUsername">
+                    <div class="error-message" id="usernameError"></div>
                 </div>
                 <div class="form-group">
                     <input type="email" placeholder="Email" required class="neon-input" id="registerEmail">
+                    <div class="error-message" id="emailError"></div>
                 </div>
                 <div class="form-group">
                     <input type="password" placeholder="Пароль" required class="neon-input" id="registerPassword">
                 </div>
                 <div class="form-group">
                     <input type="password" placeholder="Подтвердите пароль" required class="neon-input" id="registerPasswordConfirm">
+                    <div class="error-message" id="passwordError"></div>
                 </div>
                 <button type="submit" class="neon-button full-width">Зарегистрироваться</button>
                 <div class="auth-links">
@@ -54,9 +57,9 @@
             </form>
 
             <div class="auth-demo">
-                <p>Демо доступ:</p>
-                <p><strong>Email:</strong> demo@rucord.com</p>
-                <p><strong>Пароль:</strong> demo123</p>
+                <p>Тестовые данные:</p>
+                <p><strong>Логин:</strong> dom4k</p>
+                <p><strong>Пароль:</strong> 1234</p>
             </div>
         </div>
     </div>

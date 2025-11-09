@@ -1,5 +1,16 @@
+// Конфигурация API
+const API_BASE_URL = 'http://node3.dom4k.ru:9999/api';
+
 // Обработка авторизации
 document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем, есть ли уже токен
+    const token = localStorage.getItem('rucord_token');
+    if (token) {
+        // Если токен есть, перенаправляем в чат
+        window.location.href = '/';
+        return;
+    }
+
     // Переключение между вкладками входа и регистрации
     const tabs = document.querySelectorAll('.auth-tab');
     const forms = document.querySelectorAll('.auth-form');
@@ -19,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     form.classList.add('active');
                 }
             });
+
+            // Очищаем ошибки при переключении
+            clearErrors();
         });
     });
     
@@ -26,10 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const email = document.getElementById('loginEmail').value;
+        const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
         
-        await handleLogin(email, password);
+        await handleLogin(username, password);
     });
     
     // Обработка формы регистрации
@@ -41,78 +55,164 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('registerPassword').value;
         const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
         
+        // Валидация пароля
         if (password !== passwordConfirm) {
-            showNotification('Пароли не совпадают', 'error');
+            showFieldError('passwordError', 'Пароли не совпадают');
             return;
         }
-        
-        await handleRegister(username, email, password);
+
+        if (password.length < 4) {
+            showFieldError('passwordError', 'Пароль должен содержать минимум 4 символа');
+            return;
+        }
+
+        clearErrors();
+        await handleRegister(username, password, email);
     });
-    
-    // Автозаполнение демо данных
+
+    // Автозаполнение тестовых данных
     const demoLogin = document.querySelector('.auth-demo');
     if (demoLogin) {
         demoLogin.addEventListener('click', function() {
-            document.getElementById('loginEmail').value = 'demo@rucord.com';
-            document.getElementById('loginPassword').value = 'demo123';
+            document.getElementById('loginUsername').value = 'dom4k';
+            document.getElementById('loginPassword').value = '1234';
         });
     }
+
+    // Очистка ошибок при вводе
+    const inputs = document.querySelectorAll('.neon-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            clearErrors();
+        });
+    });
 });
 
 // Функция входа
-async function handleLogin(email, password) {
+async function handleLogin(username, password) {
+    const submitBtn = document.querySelector('#loginForm .neon-button');
+    const originalText = submitBtn.textContent;
+    
     try {
-        const response = await fetch('/api/auth/login', {
+        submitBtn.textContent = 'Вход...';
+        submitBtn.disabled = true;
+
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ username, password })
         });
         
         const result = await response.json();
         
         if (result.success) {
-            showNotification(result.message, 'success');
-            // Перенаправляем на главную страницу после успешного входа
+            // Сохраняем токен в localStorage
+            localStorage.setItem('rucord_token', result.token);
+            localStorage.setItem('rucord_username', username);
+            
+            showNotification('Вход выполнен успешно!', 'success');
+            
+            // Перенаправляем на главную страницу
             setTimeout(() => {
                 window.location.href = '/';
             }, 1000);
         } else {
-            showNotification(result.message, 'error');
+            showNotification('Неверное имя пользователя или пароль', 'error');
         }
     } catch (error) {
         console.error('Ошибка входа:', error);
         showNotification('Ошибка подключения к серверу', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
 // Функция регистрации
-async function handleRegister(username, email, password) {
+async function handleRegister(username, password, email) {
+    const submitBtn = document.querySelector('#registerForm .neon-button');
+    const originalText = submitBtn.textContent;
+    
     try {
-        const response = await fetch('/api/auth/register', {
+        submitBtn.textContent = 'Регистрация...';
+        submitBtn.disabled = true;
+
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, email, password })
+            body: JSON.stringify({ username, password, email })
         });
         
         const result = await response.json();
         
         if (result.success) {
-            showNotification(result.message, 'success');
-            // Перенаправляем на главную страницу после успешной регистрации
+            // Сохраняем токен в localStorage
+            localStorage.setItem('rucord_token', result.token);
+            localStorage.setItem('rucord_username', username);
+            
+            showNotification('Регистрация выполнена успешно!', 'success');
+            
+            // Перенаправляем на главную страницу
             setTimeout(() => {
                 window.location.href = '/';
             }, 1000);
         } else {
-            showNotification(result.message, 'error');
+            // Обработка ошибок валидации
+            if (result.value === 'username') {
+                showFieldError('usernameError', result.message);
+            } else if (result.value === 'email') {
+                showFieldError('emailError', result.message);
+            } else {
+                showNotification(result.message || 'Ошибка регистрации', 'error');
+            }
         }
     } catch (error) {
         console.error('Ошибка регистрации:', error);
         showNotification('Ошибка подключения к серверу', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
+}
+
+// Функция выхода
+function handleLogout() {
+    localStorage.removeItem('rucord_token');
+    localStorage.removeItem('rucord_username');
+    window.location.href = '/login';
+}
+
+// Показать ошибку поля
+function showFieldError(fieldId, message) {
+    const errorElement = document.getElementById(fieldId);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        
+        // Добавляем класс ошибки к полю ввода
+        const inputField = errorElement.previousElementSibling;
+        if (inputField && inputField.classList.contains('neon-input')) {
+            inputField.classList.add('error');
+        }
+    }
+}
+
+// Очистить все ошибки
+function clearErrors() {
+    const errorElements = document.querySelectorAll('.error-message');
+    errorElements.forEach(element => {
+        element.textContent = '';
+        element.style.display = 'none';
+    });
+
+    const errorInputs = document.querySelectorAll('.neon-input.error');
+    errorInputs.forEach(input => {
+        input.classList.remove('error');
+    });
 }
 
 // Функция показа уведомлений
@@ -128,5 +228,28 @@ function showNotification(message, type = 'info') {
     
     setTimeout(() => {
         notification.classList.add('hidden');
-    }, 3000);
+    }, 4000);
 }
+
+// Проверка авторизации
+function checkAuth() {
+    return localStorage.getItem('rucord_token') !== null;
+}
+
+// Получение токена
+function getToken() {
+    return localStorage.getItem('rucord_token');
+}
+
+// Получение имени пользователя
+function getUsername() {
+    return localStorage.getItem('rucord_username') || 'Пользователь';
+}
+
+// Экспорт функций для использования в других скриптах
+window.Auth = {
+    checkAuth,
+    getToken,
+    getUsername,
+    handleLogout
+};
