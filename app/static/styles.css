@@ -1,0 +1,567 @@
+    :root {
+    --dark-bg: #1a1a1a;
+    --darker-bg: #121212;
+    --sidebar-bg: #23272a;
+    --chat-bg: #2f3136;
+    --accent-purple: #7289da;
+    --accent-purple-dark: #5b6eae;
+    --accent-purple-light: #8ea1e1;
+    --text-primary: #ffffff;
+    --text-secondary: #b9bbbe;
+    --success: #43b581;
+    --danger: #f04747;
+    --warning: #faa61a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Модальные окна */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: var(--sidebar-bg);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 0 30px rgba(114, 137, 218, 0.3);
+    border: 1px solid var(--accent-purple);
+}
+
+.modal h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--accent-purple-light);
+}
+
+.modal input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    background-color: var(--darker-bg);
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.modal input:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+}
+
+.modal button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent-purple);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.modal button:hover {
+    background-color: var(--accent-purple-dark);
+}
+
+.modal p {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--text-secondary);
+}
+
+.modal a {
+    color: var(--accent-purple-light);
+    text-decoration: none;
+}
+
+.modal a:hover {
+    text-decoration: underline;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+/* Основной контейнер приложения */
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Боковая панель серверов */
+.servers-sidebar {
+    width: 70px;
+    background-color: var(--darker-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    border-right: 1px solid #333;
+}
+
+.server-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.server-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--sidebar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0 auto;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.server-item:hover {
+    border-radius: 35%;
+    background-color: var(--accent-purple);
+}
+
+.server-item.active {
+    border-radius: 35%;
+    background-color: var(--accent-purple);
+}
+
+.server-divider {
+    height: 2px;
+    background-color: #333;
+    margin: 10px auto;
+    width: 30px;
+}
+
+.add-server {
+    background-color: #36393f;
+    color: var(--success);
+}
+
+.add-server:hover {
+    background-color: var(--success);
+    color: white;
+}
+
+/* Панель каналов */
+.channels-sidebar {
+    width: 240px;
+    background-color: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #333;
+}
+
+.server-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.server-header h3 {
+    color: var(--accent-purple-light);
+    font-size: 16px;
+}
+
+.channels-section {
+    padding: 15px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.add-channel {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.add-channel:hover {
+    color: var(--text-primary);
+}
+
+.channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.channel-item {
+    padding: 8px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.channel-item:hover {
+    background-color: #3a3e45;
+    color: var(--text-primary);
+}
+
+.channel-item.active {
+    background-color: #42464d;
+    color: var(--text-primary);
+}
+
+.channel-item.voice::before {
+    content: "🔊";
+    margin-right: 5px;
+}
+
+.user-panel {
+    margin-top: auto;
+    background-color: #292b2f;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), #a67fff);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.status {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.user-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.control-btn:hover {
+    background-color: #3a3e45;
+    color: var(--text-primary);
+}
+
+/* Основная область чата */
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-bg);
+}
+
+.chat-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.channel-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hashtag {
+    color: var(--text-secondary);
+    font-size: 20px;
+}
+
+.chat-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.header-btn:hover {
+    background-color: #3a3e45;
+    color: var(--text-primary);
+}
+
+.search-input {
+    background-color: #202225;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: var(--text-primary);
+    width: 150px;
+}
+
+.search-input:focus {
+    outline: none;
+    width: 200px;
+    transition: width 0.3s;
+}
+
+.messages-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    display: flex;
+    gap: 15px;
+    padding: 5px 0;
+}
+
+.message:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.own-message {
+    background-color: rgba(114, 137, 218, 0.05);
+}
+
+.message-content {
+    flex: 1;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.username {
+    font-weight: bold;
+    color: var(--accent-purple-light);
+}
+
+.timestamp {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.message-text {
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.message-input-container {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #40444b;
+    margin: 15px;
+    border-radius: 8px;
+}
+
+.input-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.input-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.input-btn:hover {
+    background-color: #3a3e45;
+    color: var(--text-primary);
+}
+
+.message-input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.message-input:focus {
+    outline: none;
+}
+
+.send-btn {
+    background: none;
+    border: none;
+    color: var(--accent-purple);
+    cursor: pointer;
+    padding: 5px;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.send-btn:hover {
+    color: var(--accent-purple-light);
+}
+
+/* Панель участников */
+.members-sidebar {
+    width: 240px;
+    background-color: var(--sidebar-bg);
+    border-left: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.members-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.members-header h4 {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.members-list {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.member-name {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.avatar.online {
+    position: relative;
+}
+
+.avatar.online::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--success);
+    border-radius: 50%;
+    border: 2px solid var(--sidebar-bg);
+}
+
+.avatar.idle::after {
+    background-color: var(--warning);
+}
+
+/* Полоса прокрутки */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--darker-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #202225;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2f3136;
+}
