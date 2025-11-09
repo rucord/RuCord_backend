@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - RuCord</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card neon-border">
+            <div class="auth-header">
+                <h1 class="neon-text">RuCord</h1>
+                <p>Неоновый мессенджер</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Вход</button>
+                <button class="auth-tab" data-tab="register">Регистрация</button>
+            </div>
+
+            <!-- Форма входа -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <input type="email" placeholder="Email" required class="neon-input" id="loginEmail">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Пароль" required class="neon-input" id="loginPassword">
+                </div>
+                <button type="submit" class="neon-button full-width">Войти</button>
+                <div class="auth-links">
+                    <a href="/" class="neon-link">← Назад к чату</a>
+                </div>
+            </form>
+
+            <!-- Форма регистрации -->
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <input type="text" placeholder="Имя пользователя" required class="neon-input" id="registerUsername">
+                </div>
+                <div class="form-group">
+                    <input type="email" placeholder="Email" required class="neon-input" id="registerEmail">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Пароль" required class="neon-input" id="registerPassword">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Подтвердите пароль" required class="neon-input" id="registerPasswordConfirm">
+                </div>
+                <button type="submit" class="neon-button full-width">Зарегистрироваться</button>
+                <div class="auth-links">
+                    <a href="/" class="neon-link">← Назад к чату</a>
+                </div>
+            </form>
+
+            <div class="auth-demo">
+                <p>Демо доступ:</p>
+                <p><strong>Email:</strong> demo@rucord.com</p>
+                <p><strong>Пароль:</strong> demo123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notification" class="notification hidden">
+        <span id="notificationText"></span>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>
